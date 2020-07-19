@@ -13,5 +13,4 @@ func Add(c *cmd.CommandController, host string, port int, pass string) {
 		reply, _ := client.SendCommand("list")
 		ctx.Reply(reply)
 	}).Desc("Well, it's Minecraft y'all")
-	return
 }

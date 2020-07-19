@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd"
-	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd/minecraft"
+	//"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd/minecraft"
 	"github.com/Necroforger/dgrouter/exrouter"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pelletier/go-toml"
@@ -30,7 +30,7 @@ var (
 	Session, _ = discordgo.New("Bot " + Secrets.Get("Discord.token").(string))
 
 	// Prefix is the command prefix for the bot.
-	Prefix = Config.Get("prefix").(string)
+	Prefix = Config.Get("Discord.prefix").(string)
 )
 
 // Read in all configuration options from both environment variables and
@@ -59,12 +59,13 @@ func main() {
 
 	// Create a command controller
 	cc := cmd.New(router)
+	cmd.Add(cc)
 
 	// Get minecraft config and Add minecraft commands
-	host, _ := Secrets.Get("Minecraft.host").(string)
-	port, _ := Secrets.Get("Minecraft.port").(int)
-	pass, _ := Secrets.Get("Minecraft.pass").(string)
-	minecraft.Add(cc, host, port, pass)
+	//host, _ := Secrets.Get("Minecraft.host").(string)
+	//port, _ := Secrets.Get("Minecraft.port").(int)
+	//pass, _ := Secrets.Get("Minecraft.pass").(string)
+	//minecraft.Add(cc, host, port, pass)
 
 	// Add message handler
 	Session.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
