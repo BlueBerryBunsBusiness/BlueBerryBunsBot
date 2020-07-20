@@ -1,5 +1,7 @@
 package minecraft
 
+import "github.com/jmoiron/sqlx"
+
 var schema = `
 CREATE TABLE IF NOT EXISTS minecraft (
 	guild INT NOT NULL,
@@ -14,9 +16,15 @@ CREATE TABLE IF NOT EXISTS minecraft (
 		ON UPDATE NO ACTION
 );`
 
+// Minecraft stores minecraft server settings for guilds
 type Minecraft struct {
-	Guild	string	`db:"guild"`
-	Host	string  `db:"host"`
-	Port 	uint 		`db:"port"`
-	Pass 	string 	`db:"pass"`
+	Guild string `db:"guild"`
+	Host  string `db:"host"`
+	Port  uint   `db:"port"`
+	Pass  string `db:"pass"`
+}
+
+// Init creates the Minecraft table in the database
+func Init(db *sqlx.DB) {
+	db.MustExec(schema)
 }
