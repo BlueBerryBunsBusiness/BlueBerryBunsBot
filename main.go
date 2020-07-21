@@ -68,15 +68,11 @@ func main() {
 	cc := cmd.New(router)
 	cmd.Add(cc)
 
-	database := db.New(dbname, dbuser, dbpass, dbport)
+	db.Init(dbname, dbuser, dbpass, dbport)
 
 	// Get minecraft config and Add minecraft commands
-	host, _ := Secrets.Get("Minecraft.host").(string)
-	port, _ := Secrets.Get("Minecraft.port").(int)
-	pass, _ := Secrets.Get("Minecraft.pass").(string)
-	minecraft.Add(cc, host, port, pass)
-
-	minecraft.Init(database)
+	minecraft.Init()
+	minecraft.Add(cc)
 
 	// Add message handler
 	Session.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {

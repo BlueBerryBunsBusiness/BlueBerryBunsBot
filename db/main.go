@@ -15,18 +15,24 @@ CREATE TABLE IF NOT EXISTS guild (
 	PRIMARY_KEY(id)
 );`
 
+// Connection stores a global connection to the database
+var Connection *sqlx.DB = nil
+
 // Guild stores all guilds this bot is a member of
 type Guild struct {
 	ID int `db:"id"`
 }
 
-func New(dbname, user, pass string, port uint) *sqlx.DB {
+// Init opens a connection to the database and initializes standard tables.
+func Init(dbname, user, pass string, port uint) {
+	var err error
+
 	cn := fmt.Sprintf("dbname=%s user=%s pass=%s port=%d sslmode=enable", dbname, user, pass, port)
-	db, err := sqlx.Connect("mysql", cn)
+	Connection, err = sqlx.Connect("mysql", cn)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	db.MustExec(schema)
-	return db
+	Connection.MustExec(schema)
 }
