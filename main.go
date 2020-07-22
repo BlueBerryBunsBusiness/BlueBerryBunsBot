@@ -37,7 +37,7 @@ var (
 	dbhost = Secrets.Get("Database.host").(string)
 	dbuser = Secrets.Get("Database.user").(string)
 	dbpass = Secrets.Get("Database.pass").(string)
-	dbport = Secrets.Get("Database.port").(uint)
+	dbport = Secrets.Get("Database.port").(int64)
 )
 
 // Read in all configuration options from both environment variables and
@@ -68,7 +68,7 @@ func main() {
 	cc := cmd.New(router)
 	cmd.Add(cc)
 
-	db.Init(dbname, dbuser, dbpass, dbport)
+	db.Init(dbuser, dbpass, dbhost, dbport, dbname)
 
 	// Get minecraft config and Add minecraft commands
 	minecraft.Init()

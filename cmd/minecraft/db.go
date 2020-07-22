@@ -1,23 +1,20 @@
 package minecraft
 
 import (
+	"log"
+
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/db"
 )
 
 var schema = `
 CREATE TABLE IF NOT EXISTS minecraft (
-	guild INT NOT NULL,
+	guild VARCHAR(25) NOT NULL,
 	host VARCHAR(50) NOT NULL,
 	port INT UNSIGNED NOT NULL,
 	pass VARCHAR(20) NOT NULL,
 	prim BOOL DEFAULT FALSE,
-	PRIMARY_KEY(guild, host, port, pass),
-	CONSTRAINT id
-		FOREIGN KEY (guild)
-		REFERENCES guild (id)
-		ON DELETE NO ACTION
-		ON UPDATE NO ACTION,
-	CONSTRAINT primary UNIQUE(guild, prim)
+	PRIMARY KEY(guild, host, port, pass),
+	UNIQUE(guild, prim)
 );`
 
 // Minecraft stores minecraft server settings for guilds
@@ -35,7 +32,20 @@ func Init() {
 }
 
 func addServer(guild, host, pass string, port int) {
-	db.Connection.MustExec("INSERT INTO minecraft (guild, host, port, pass) VALUES($1, $2, $3, $4)", guild, host, port, pass)
+	stmt, err := db.Connection.Prepare("INSERT INTO minecraft (guild, host, port, pass) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = stmt.Exec(guild, host, port, pass)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func getServers(guild string) []Minecraft {
+	servers := []Minecraft{}
+	db.Connection.Select(&servers, "SELECT * FROM minecraft WHERE guild=? ORDER BY host ASC", guild)
+	return servers
 }
 
 func setPrimary(guild string) {
