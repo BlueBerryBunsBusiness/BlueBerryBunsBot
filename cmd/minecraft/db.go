@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS minecraft (
 	pass VARCHAR(20) NOT NULL,
 	prim BOOL DEFAULT FALSE,
 	PRIMARY KEY(guild, host, port, pass),
-	UNIQUE(guild, prim)
+	UNIQUE(guild, prim),
+	FOREIGN KEY(guild) REFERENCES guild(id)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
 );`
 
 // Minecraft stores minecraft server settings for guilds

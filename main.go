@@ -30,6 +30,9 @@ var (
 	// In this use case, there is no error that would be returned.
 	Session, _ = discordgo.New("Bot " + Secrets.Get("Discord.token").(string))
 
+	// Router handles bot commands
+	Router = exrouter.New()
+
 	// Prefix is the command prefix for the bot.
 	Prefix = Config.Get("Discord.prefix").(string)
 
@@ -61,11 +64,8 @@ func main() {
 		return
 	}
 
-	// Create a command router
-	router := exrouter.New()
-
 	// Create a command controller
-	cc := cmd.New(router)
+	cc := cmd.New(Router)
 	cmd.Add(cc)
 
 	db.Init(dbuser, dbpass, dbhost, dbport, dbname)
@@ -74,10 +74,9 @@ func main() {
 	minecraft.Init()
 	minecraft.Add(cc)
 
-	// Add message handler
-	Session.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
-		router.FindAndExecute(Session, Prefix, Session.State.User.ID, m.Message)
-	})
+	// Handle Discord Events
+	Session.AddHandler(guildCreate)
+	Session.AddHandler(addRouter)
 
 	// Open a websocket connection to Discord
 	err = Session.Open()

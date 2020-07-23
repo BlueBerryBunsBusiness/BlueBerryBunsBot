@@ -36,3 +36,15 @@ func Init(user, pass, host string, port int64, dbname string) {
 
 	Connection.MustExec(schema)
 }
+
+// AddGuild inserts a guild into the database
+func AddGuild(guild string) {
+	stmt, err := Connection.Prepare("INSERT INTO guild (guild) VALUES (?)")
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = stmt.Exec(guild)
+	if err != nil {
+		log.Println(err)
+	}
+}

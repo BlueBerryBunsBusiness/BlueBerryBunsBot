@@ -8,9 +8,19 @@ import (
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd"
 	"github.com/Necroforger/dgrouter/exrouter"
 	"github.com/bearbin/mcgorcon"
+	"github.com/bwmarrin/discordgo"
 )
 
 var _ = mcgorcon.Dial // For debugging; delete when done
+
+var (
+	// Help is the minecraft command help message
+	Help *discordgo.MessageEmbed
+)
+
+func init() {
+	Help.Author.IconURL = "https://i.imgur.com/ipJTwRA.png"
+}
 
 // Add adds the minecraft command package to a CommandController
 func Add(c *cmd.CommandController) {
@@ -20,8 +30,9 @@ func Add(c *cmd.CommandController) {
 		case "server":
 			server(ctx)
 		default:
+
 		}
-		ctx.Reply("")
+		ctx.ReplyEmbed(Help)
 	}).Desc("Well, it's Minecraft y'all")
 }
 
