@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd"
 	"github.com/Necroforger/dgrouter/exrouter"
@@ -18,17 +19,19 @@ var (
 	helpSuffix string
 	helpMc     string
 	helpServer string
-	helpAdd    string
-	helpList   string
+
+	cmdPrefix       string
+	cmdServerAdd    string
+	cmdServerList   string
+	cmdServerRemove string
 )
 
 func init() {
 	helpPrefix = "```asciidoc\n"
 	helpSuffix = "```"
-	helpServer = ""
-	helpAdd = ""
-	helpList = ""
-	helpMc = ""
+	cmdServerAdd = "mc server add HOST RCONPORT PASS [PRIMARY]\n"
+	cmdServerList = "mc server list\n"
+	cmdServerRemove = "mc server remove ID\n"
 }
 
 // Add adds the minecraft command package to a CommandController
@@ -48,9 +51,15 @@ func Add(c *cmd.CommandController) {
 	serverRemove := server.On("remove", serverRemoveFunc)
 	serverRemove.Desc("Remove minecraft server from the guild")
 
-	for _, v := range c.Router.Routes {
+	for _, v := range mc.Routes {
 		helpMc += fmt.Sprintf("* %-15s:: %s\n", v.Name, v.Description)
 	}
+
+	for _, v := range server.Routes {
+		helpServer += fmt.Sprintf("* %-15s:: %s\n", v.Name, v.Description)
+	}
+
+	cmdPrefix = c.Prefix
 }
 
 func mcFunc(ctx *exrouter.Context) {
@@ -64,11 +73,11 @@ func serverFunc(ctx *exrouter.Context) {
 func serverAddFunc(ctx *exrouter.Context) {
 	guild := ctx.Msg.GuildID
 	host := ctx.Args.Get(1)
-	pass := ctx.Args.Get(2)
 	port, err := strconv.Atoi(ctx.Args.Get(3))
+	pass := ctx.Args.Get(2)
 	prim := ctx.Args.Get(4)
 	if host == "" || pass == "" {
-		ctx.Reply(helpPrefix + helpAdd + helpSuffix)
+		ctx.Reply(helpPrefix + cmdPrefix + cmdServerAdd + helpSuffix)
 		return
 	}
 	if err != nil || port < 0 || port > 65535 {
@@ -82,18 +91,62 @@ func serverAddFunc(ctx *exrouter.Context) {
 
 func serverListFunc(ctx *exrouter.Context) {
 	guild := ctx.Msg.GuildID
-	servers := getServers(guild)
+	servers, prim, err := getServers(guild)
+	if err != nil {
+		ctx.Reply("Something went wrong on the server side, please contact the bot developer with your Guild ID")
+		return
+	}
 	if len(servers) == 0 {
 		ctx.Reply("Guild has no servers, maybe add one? :sweat_smile:")
 		return
 	}
-	reply := "```\n"
+
+	headerID := "ID"
+	headerHost := "Host"
+
+	lengthHost := len(headerHost)
 	for _, value := range servers {
-		reply += fmt.Sprintf("%3d %20s %6d\n", value.id, value.Host, value.Port)
+		if l := len(value.Host); l > lengthHost {
+			lengthHost = l
+		}
 	}
+
+	lengthID := len(headerID)
+	if l := len(strconv.Itoa(servers[len(servers)-1].ID)); l > lengthID {
+		lengthID = l
+	}
+
+	lineID := strings.Repeat("-", lengthID+2)
+	lineHost := strings.Repeat("-", lengthHost+2)
+
+	reply := "```\n"
+	reply += "+---+" + lineID + "+" + lineHost + "+\n"
+	reply += fmt.Sprintf("| %s | %*s | %-*s |\n", "P", lengthID, headerID, lengthHost, headerHost)
+	reply += "+---+" + lineID + "+" + lineHost + "+\n"
+	for _, value := range servers {
+		p := " "
+		if value.ID == prim {
+			p = "*"
+		}
+		reply += fmt.Sprintf("| %s | %*d | %-*s |\n", p, lengthID, value.ID, lengthHost, value.Host)
+	}
+	reply += "+---+" + lineID + "+" + lineHost + "+"
 	reply += "```"
 	ctx.Reply(reply)
 }
 
 func serverRemoveFunc(ctx *exrouter.Context) {
+	guild := ctx.Msg.GuildID
+	id, err := strconv.Atoi(ctx.Args.Get(1))
+	if err != nil {
+		reply := "Missing server id.\n"
+		reply += helpPrefix + cmdPrefix + cmdServerRemove + helpSuffix
+		ctx.Reply(reply)
+	}
+	srv, err := deleteServer(guild, id)
+	if err != nil {
+		ctx.Reply("Something went wrong on the server side, please contact the bot developer with your Guild ID")
+		return
+	}
+	ctx.Reply("Server `" + srv.Host + "` deleted")
 }

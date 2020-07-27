@@ -7,11 +7,12 @@ import (
 // CommandController is used to batch manage routed commands
 type CommandController struct {
 	Router *exrouter.Route
+	Prefix string
 }
 
 // New is a CommandController constuctor. Use this instead of creating an instance directly.
-func New(r *exrouter.Route) *CommandController {
-	c := &CommandController{r}
+func New(r *exrouter.Route, prefix string) *CommandController {
+	c := &CommandController{r, prefix}
 	c.Router.Default = c.Router.On("help", func(ctx *exrouter.Context) {
 		var text = ""
 		for _, v := range c.Router.Routes {

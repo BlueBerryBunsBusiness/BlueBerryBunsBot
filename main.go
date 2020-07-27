@@ -65,7 +65,7 @@ func main() {
 	}
 
 	// Create a command controller
-	cc := cmd.New(Router)
+	cc := cmd.New(Router, Prefix)
 	cmd.Add(cc)
 
 	db.Init(dbuser, dbpass, dbhost, dbport, dbname)
