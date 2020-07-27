@@ -39,7 +39,7 @@ func Init(user, pass, host string, port int64, dbname string) {
 
 // AddGuild inserts a guild into the database
 func AddGuild(guild string) {
-	stmt, err := Connection.Prepare("INSERT INTO guild (guild) VALUES (?)")
+	stmt, err := Connection.Prepare("INSERT INTO guild VALUE (?)")
 	if err != nil {
 		log.Println(err)
 	}
