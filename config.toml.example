@@ -1,0 +1,13 @@
+[Discord]
+prefix = "b!"
+token = "token"
+
+[Emoji]
+srcGuild = "Source guildID for custom bot emojis"
+
+[Database]
+name = "dbname"
+host = "127.0.0.1"
+user = "dbuser"
+pass = "dbpass"
+port = 3306

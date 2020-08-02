@@ -15,8 +15,6 @@ var (
 	Emoji = &confEmoji{}
 	// Database contains database settings
 	Database = &confDatabase{}
-	// Minecraft contains minecraft settings
-	Minecraft = &confMinecraft{}
 )
 
 type confDiscord struct {
@@ -32,12 +30,6 @@ type confDatabase struct {
 	Name string
 	Host string
 	User string
-	Pass string
-	Port int64
-}
-
-type confMinecraft struct {
-	Host string
 	Pass string
 	Port int64
 }
@@ -59,10 +51,6 @@ func init() {
 	Database.User = getProperty("Database.user", config).(string)
 	Database.Pass = getProperty("Database.pass", config).(string)
 	Database.Port = getProperty("Database.port", config).(int64)
-	// MINECRAFT SECTION
-	Minecraft.Host = getProperty("Minecraft.host", config).(string)
-	Minecraft.Pass = getProperty("Minecraft.pass", config).(string)
-	Minecraft.Port = getProperty("Minecraft.port", config).(int64)
 }
 
 func getProperty(prop string, t *toml.Tree) interface{} {
