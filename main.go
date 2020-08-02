@@ -10,80 +10,67 @@ import (
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd"
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd/minecraft"
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/db"
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/config"
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/emoji"
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/global"
 	"github.com/Necroforger/dgrouter/exrouter"
 	"github.com/bwmarrin/discordgo"
-	"github.com/pelletier/go-toml"
 )
 
 // Version is a constant that stores the Disgord version information.
 const Version = "v0.0.0-alpha"
 
-var (
-	// Secrets contains all key/value pairs defined in the secrets toml file.
-	Secrets, _ = toml.LoadFile("secrets.toml")
-
-	// Config contains server specific config
-	Config, _ = toml.LoadFile("config.toml")
-
-	// Session is declared in the global space so it can be easily used
-	// throughout this program.
-	// In this use case, there is no error that would be returned.
-	Session, _ = discordgo.New("Bot " + Secrets.Get("Discord.token").(string))
-
-	// Router handles bot commands
-	Router = exrouter.New()
-
-	// Prefix is the command prefix for the bot.
-	Prefix = Config.Get("Discord.prefix").(string)
-
-	dbname = Secrets.Get("Database.name").(string)
-	dbhost = Secrets.Get("Database.host").(string)
-	dbuser = Secrets.Get("Database.user").(string)
-	dbpass = Secrets.Get("Database.pass").(string)
-	dbport = Secrets.Get("Database.port").(int64)
-)
-
-// Read in all configuration options from both environment variables and
-// command line arguments.
-func init() {
-	if Session.Token == "" {
-		flag.StringVar(&Session.Token, "t", "", "Discord Authentication Token")
-	}
-}
+var ()
 
 func main() {
 	// Declare any variables needed later.
 	var err error
 
+	// Initialize global discord Session
+	global.Session, err = discordgo.New("Bot " + config.Discord.Token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Initialize global command router
+	global.Router = exrouter.New()
+
 	// Parse command line arguments
 	flag.Parse()
 
 	// Verify a Token was provided
-	if Session.Token == "" {
+	if global.Session.Token == "" {
 		log.Println("You must provide a Discord authentication token.")
 		return
 	}
 
-	// Create a command controller
-	cc := cmd.New(Router, Prefix)
-	cmd.Add(cc)
-
-	db.Init(dbuser, dbpass, dbhost, dbport, dbname)
-
-	// Get minecraft config and Add minecraft commands
-	minecraft.Init()
-	minecraft.Add(cc)
-
-	// Handle Discord Events
-	Session.AddHandler(guildCreate)
-	Session.AddHandler(addRouter)
-
 	// Open a websocket connection to Discord
-	err = Session.Open()
+	err = global.Session.Open()
 	if err != nil {
 		log.Printf("error opening connection to Discord, %s\n", err)
 		os.Exit(1)
 	}
+
+	// Initialize global emoji state
+	emoji.Init(global.Session)
+
+	// Create a command controller
+	cmd.Add(global.Router)
+
+	// Initialize database
+	db.Init(config.Database.User,
+		config.Database.Pass,
+		config.Database.Host,
+		config.Database.Port,
+		config.Database.Name)
+
+	// Get minecraft config and Add minecraft commands
+	minecraft.Init()
+	minecraft.Add(global.Router)
+
+	// Handle Discord Events
+	global.Session.AddHandler(guildCreate)
+	global.Session.AddHandler(addRouter)
 
 	// Wait for a CTRL-C
 	log.Printf(`Now running. Press CTRL-C to exit.`)
@@ -92,7 +79,7 @@ func main() {
 	<-sc
 
 	// Clean up
-	Session.Close()
+	global.Session.Close()
 
 	// Exit Normally.
 }

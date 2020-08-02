@@ -2,9 +2,16 @@ package minecraft
 
 import (
 	"database/sql"
+	"errors"
 	"log"
+	"strings"
 
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/db"
+)
+
+var (
+	// ErrInvID is an invalid id error
+	ErrInvID = errors.New("Invalid ID")
 )
 
 var schema1 = `
@@ -49,7 +56,7 @@ DELIMITER ;
 type Minecraft struct {
 	Guild string `db:"guild"`
 	Host  string `db:"host"`
-	Port  int    `db:"port"`
+	Port  uint   `db:"port"`
 	Pass  string `db:"pass"`
 	ID    int    `db:"id"`
 }
@@ -71,20 +78,20 @@ func addServer(guild, host, pass string, port int, prim string) error {
 		return err
 	}
 
-	tx, err := db.Connection.Begin()
+	_, err = db.Connection.Exec("INSERT INTO minecraft (guild, host, port, pass, id) VALUES (?, ?, ?, ?, ?)", guild, host, port, pass, num)
 	if err != nil {
-		log.Println(guild, err)
+		if !strings.Contains(err.Error(), "Error 1062") {
+			log.Println(guild, err)
+		}
 		return err
 	}
-	tx.Exec("INSERT INTO minecraft (guild, host, port, pass, id) VALUES (?, ?, ?, ?, ?)", guild, host, port, pass, num)
-	if prim == "true" || num == 0 {
-		tx.Exec("INSERT INTO minecraft_prim(guild, id) VALUES(?, ?) ON DUPLICATE KEY UPDATE id=?", guild, num, num)
-	}
-	err = tx.Commit()
 
-	if err != nil {
-		log.Println(guild, err)
-		return err
+	if prim == "true" || num == 0 {
+		_, err = db.Connection.Exec("INSERT INTO minecraft_prim(guild, id) VALUES(?, ?) ON DUPLICATE KEY UPDATE id=?", guild, num, num)
+		if err != nil {
+			log.Println(guild, err)
+			return err
+		}
 	}
 	return nil
 }
@@ -113,7 +120,7 @@ func getServers(guild string) ([]Minecraft, int, error) {
 
 // deleteServer deletes a server for a guild from the database
 func deleteServer(guild string, id int) (*Minecraft, error) {
-	res := db.Connection.QueryRow("SELECT * FROM minecraft WHERE guild=? AND id = ?", guild, id)
+	res := db.Connection.QueryRowx("SELECT * FROM minecraft WHERE guild = ? AND id = ?", guild, id)
 
 	_, err := db.Connection.Exec("DELETE FROM minecraft WHERE guild = ? AND id = ?", guild, id)
 	if err != nil {
@@ -127,14 +134,14 @@ func deleteServer(guild string, id int) (*Minecraft, error) {
 		return nil, err
 	}
 
-	_, err = db.Connection.Exec("UPDATE minecraft_prim SET id = IFNULL(SELECT id FROM minecraft WHERE guild = ? ORDER BY id LIMIT 1, -1) WHERE guild = ?", guild, guild)
+	_, err = db.Connection.Exec("UPDATE minecraft_prim SET id = IFNULL((SELECT id FROM minecraft WHERE guild = ? ORDER BY id LIMIT 1), -1) WHERE guild = ?", guild, guild)
 	if err != nil {
 		log.Println(guild, err)
 		return nil, err
 	}
 
-	var srv *Minecraft
-	err = res.Scan(&srv)
+	srv := &Minecraft{}
+	err = res.StructScan(srv)
 	if err != nil {
 		log.Println(guild, err)
 		return nil, err
@@ -144,6 +151,36 @@ func deleteServer(guild string, id int) (*Minecraft, error) {
 }
 
 // setPrimary sets server as primary / default for a guild
-func setPrimary(guild string) {
+func setPrimary(guild string, id int) (*Minecraft, error) {
+	res := db.Connection.QueryRowx("SELECT COUNT(*) FROM minecraft WHERE guild=?", guild)
 
+	var num int
+	err := res.Scan(&num)
+	if err != nil {
+		log.Println(guild, err)
+		return nil, err
+	}
+
+	if id < 0 || id >= num {
+		return nil, ErrInvID
+	}
+
+	log.Println(guild, id)
+	res = db.Connection.QueryRowx("SELECT * FROM minecraft WHERE guild = ? AND id = ?", guild, id)
+
+	srv := &Minecraft{}
+	err = res.StructScan(srv)
+	if err != nil {
+		log.Println(srv)
+		log.Println(guild, err, "????")
+		return nil, err
+	}
+
+	_, err = db.Connection.Exec("UPDATE minecraft_prim SET id=? WHERE guild=?", id, guild)
+	if err != nil {
+		log.Println(guild, err)
+		return nil, err
+	}
+
+	return srv, nil
 }

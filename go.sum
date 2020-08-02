@@ -4,8 +4,8 @@ github.com/Necroforger/dgrouter v0.0.0-20200517224846-e66453b957c1 h1:3OHJOlf0r1
 github.com/Necroforger/dgrouter v0.0.0-20200517224846-e66453b957c1/go.mod h1:FdMxPfOp4ppZW2OJjLagSMri7g5k9luvTm7Y3aIxQSc=
 github.com/bearbin/mcgorcon v0.0.0-20141104170123-f611ad04551a h1:WS0mhgU8W7T5gN1WNrBXqJUAeQ9eyWOpZx1cSyJw/Ew=
 github.com/bearbin/mcgorcon v0.0.0-20141104170123-f611ad04551a/go.mod h1:Gt6oUa/biURD8wKBXC9vIlV/VQQSNHhSVRvUMHxPPzM=
-github.com/bwmarrin/discordgo v0.21.1 h1:UI2PWwzvn5IFuscYcDc6QB/duhs9MUIjQ4HclcIZisc=
-github.com/bwmarrin/discordgo v0.21.1/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
+github.com/bwmarrin/discordgo v0.22.0 h1:uBxY1HmlVCsW1IuaPjpCGT6A2DBwRn0nvOguQIxDdFM=
+github.com/bwmarrin/discordgo v0.22.0/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
