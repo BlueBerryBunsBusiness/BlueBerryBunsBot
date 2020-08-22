@@ -1,0 +1,5 @@
+1. Complete text.toml
+2. Implement utils/text
+3. Replace all text in code with utils/text
+4. Rewamp help commands and empty commands
+5. Implement minecraft command `/list` to list online players

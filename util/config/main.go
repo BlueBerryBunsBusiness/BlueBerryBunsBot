@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/global"
 	"github.com/pelletier/go-toml"
 )
 
 var (
-	configPath = "config.toml"
 	// Discord contains discordbot settings
 	Discord = &confDiscord{}
 	// Emoji contains bot emoji settings
@@ -35,7 +35,7 @@ type confDatabase struct {
 }
 
 func init() {
-	config, err := toml.LoadFile("config.toml")
+	config, err := toml.LoadFile(global.ConfigPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -55,7 +55,7 @@ func init() {
 
 func getProperty(prop string, t *toml.Tree) interface{} {
 	if !t.Has(prop) {
-		log.Fatalln(fmt.Sprintf("Missing `%s` in `%s`", prop, configPath))
+		log.Fatalln(fmt.Sprintf("Missing `%s` in `%s`", prop, global.ConfigPath))
 	}
 	return t.Get(prop)
 }

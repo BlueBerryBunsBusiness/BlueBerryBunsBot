@@ -1,0 +1,43 @@
+[Generic]
+emptyHelp = "Prints this help menu"
+embedTitle = "bbbbot's commands"
+embedDescription = "Commands go bbbbrrrrrr, usage:"
+
+[Minecraft]
+
+[Minecraft.Errors]
+invalidId = "Invalid server id."
+invalidPort = "Port has to be a number between 0 and 65536."
+serverExists = "Minecraft server `%s` already exists"
+serverSide = "Something went wrong on the server side, please contact the bot developer with your Guild ID"
+noServers = "Guild has no servers, maybe add one? :sweat_smile:"
+
+[Minecraft.Mc]
+command = "mc"
+description = "Minecraft commands"
+
+[Minecraft.Mc.Server]
+command = "server"
+description = "Minecraft server commands"
+
+[Minecraft.Mc.Server.Add]
+command = "add"
+description = "Add a minecraft server to the guild"
+reply = "Added Minecraft server `%s`"
+
+[Minecraft.Mc.Server.List]
+command = "list"
+description = "List minecraft servers in the guild"
+tableFrame = "+---+%s+%s+\n"
+tableHeader = "| %s | %*s | %-*s |\n"
+tableRow = "| %s | %*d | %-*s |\n"
+
+[Minecraft.Mc.Server.Remove]
+command = "remove"
+description = "Remove minecraft server from the guild"
+reply = "Server `%s` removed"
+
+[Minecraft.Mc.Server.Primary]
+command = "primary"
+description = "Set primary server in the guild"
+reply = "Server `%s` set as primary"

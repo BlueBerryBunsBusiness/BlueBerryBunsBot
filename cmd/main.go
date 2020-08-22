@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/config"
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/text"
 	"github.com/Necroforger/dgrouter/exrouter"
 	"github.com/bwmarrin/discordgo"
 )
@@ -36,9 +37,9 @@ func helpFunc(ctx *exrouter.Context) {
 	// Create embedfields slize
 	fields := make([]*discordgo.MessageEmbedField, len(ctx.Route.Parent.Routes)-1)
 
-	embed.Title = "bbbbot's commands"
+	embed.Title = text.Generic.EmbedTitle
 
-	desc := "Commands go bbbbrrrrrr, usage:"
+	desc := text.Generic.EmbedDescription
 	usage := fmt.Sprintf("```\n%s%s <command>\n```", config.Discord.Prefix, ctx.Route.Name)
 	embed.Description = fmt.Sprintf("%s\n%s", desc, usage)
 
