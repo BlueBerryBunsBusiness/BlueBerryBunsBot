@@ -1,4 +1,4 @@
-package minecraft
+package db
 
 import (
 	"database/sql"
@@ -68,8 +68,8 @@ func Init() {
 	//db.Connection.MustExec(schema3)
 }
 
-// addServer inserts a server for a guild to the database
-func addServer(guild, host, pass string, port int, prim string) error {
+// AddServer inserts a server for a guild to the database
+func AddServer(guild, host, pass string, port int, prim string) error {
 	res := db.Connection.QueryRow("SELECT COUNT(*) FROM minecraft WHERE guild=?", guild)
 	var num int
 	err := res.Scan(&num)
@@ -96,9 +96,22 @@ func addServer(guild, host, pass string, port int, prim string) error {
 	return nil
 }
 
-// getServers retreives all servers for a guild from the database
-func getServers(guild string) ([]Minecraft, int, error) {
-	servers := []Minecraft{}
+// GetServer retrieves a server from a guild
+func GetServer(guild string, id int) (*Minecraft, error) {
+	row := db.Connection.QueryRowx("SELECT * FROM minecraft WHERE guild=? AND id=?", guild, id)
+	srv := &Minecraft{}
+	err := row.StructScan(srv)
+	if err != nil {
+		log.Println(guild, err)
+		return nil, err
+	}
+
+	return srv, nil
+}
+
+// GetServers retreives all servers for a guild from the database
+func GetServers(guild string) ([]*Minecraft, int, error) {
+	servers := []*Minecraft{}
 	err := db.Connection.Select(&servers, "SELECT * FROM minecraft WHERE guild=? ORDER BY id ASC", guild)
 	if err != nil {
 		log.Println(guild, err)
@@ -118,8 +131,8 @@ func getServers(guild string) ([]Minecraft, int, error) {
 	return servers, num, err
 }
 
-// deleteServer deletes a server for a guild from the database
-func deleteServer(guild string, id int) (*Minecraft, error) {
+// DeleteServer deletes a server for a guild from the database
+func DeleteServer(guild string, id int) (*Minecraft, error) {
 	res := db.Connection.QueryRowx("SELECT * FROM minecraft WHERE guild = ? AND id = ?", guild, id)
 
 	_, err := db.Connection.Exec("DELETE FROM minecraft WHERE guild = ? AND id = ?", guild, id)
@@ -150,8 +163,8 @@ func deleteServer(guild string, id int) (*Minecraft, error) {
 	return srv, nil
 }
 
-// setPrimary sets server as primary / default for a guild
-func setPrimary(guild string, id int) (*Minecraft, error) {
+// SetPrimary sets server as primary / default for a guild
+func SetPrimary(guild string, id int) (*Minecraft, error) {
 	res := db.Connection.QueryRowx("SELECT COUNT(*) FROM minecraft WHERE guild=?", guild)
 
 	var num int

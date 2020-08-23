@@ -41,3 +41,8 @@ reply = "Server `%s` removed"
 command = "primary"
 description = "Set primary server in the guild"
 reply = "Server `%s` set as primary"
+
+[Minecraft.Mc.List]
+command = "list"
+description = "List players online on server"
+reply = "```\n%s\n```"

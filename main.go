@@ -44,16 +44,6 @@ func main() {
 		return
 	}
 
-	// Open a websocket connection to Discord
-	err = global.Session.Open()
-	if err != nil {
-		log.Printf("error opening connection to Discord, %s\n", err)
-		os.Exit(1)
-	}
-
-	// Initialize global emoji state
-	emoji.Init(global.Session)
-
 	// Create a command controller
 	cmd.Add(global.Router)
 
@@ -64,13 +54,23 @@ func main() {
 		config.Database.Port,
 		config.Database.Name)
 
-	// Get minecraft config and Add minecraft commands
-	minecraft.Init()
-	minecraft.Add(global.Router)
-
 	// Handle Discord Events
 	global.Session.AddHandler(guildCreate)
 	global.Session.AddHandler(addRouter)
+
+	// Open a websocket connection to Discord
+	err = global.Session.Open()
+	if err != nil {
+		log.Printf("error opening connection to Discord, %s\n", err)
+		os.Exit(1)
+	}
+
+	// Initialize global emoji state
+	emoji.Init(global.Session)
+
+	// Get minecraft config and Add minecraft commands
+	minecraft.Init()
+	minecraft.Add(global.Router)
 
 	// Wait for a CTRL-C
 	log.Printf(`Now running. Press CTRL-C to exit.`)

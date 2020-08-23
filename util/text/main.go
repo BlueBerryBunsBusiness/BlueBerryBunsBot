@@ -43,6 +43,7 @@ type minecraftErrors struct {
 type minecraftMc struct {
 	command
 	Server minecraftMcServer
+	List   minecraftMcList
 }
 
 type minecraftMcServer struct {
@@ -72,6 +73,10 @@ type minecraftMcServerPrimary struct {
 	command
 }
 
+type minecraftMcList struct {
+	command
+}
+
 func init() {
 	tomlFile, err := toml.LoadFile(global.TextConfigPath)
 	if err != nil {
@@ -95,12 +100,22 @@ func init() {
 	Minecraft.Mc.Server.Description = getProperty("Minecraft.Mc.Server.description", tomlFile).(string)
 	Minecraft.Mc.Server.Add.Command = getProperty("Minecraft.Mc.Server.Add.command", tomlFile).(string)
 	Minecraft.Mc.Server.Add.Description = getProperty("Minecraft.Mc.Server.Add.description", tomlFile).(string)
+	Minecraft.Mc.Server.Add.Reply = getProperty("Minecraft.Mc.Server.Add.reply", tomlFile).(string)
 	Minecraft.Mc.Server.List.Command = getProperty("Minecraft.Mc.Server.List.command", tomlFile).(string)
 	Minecraft.Mc.Server.List.Description = getProperty("Minecraft.Mc.Server.List.description", tomlFile).(string)
+	Minecraft.Mc.Server.List.TableFrame = getProperty("Minecraft.Mc.Server.List.tableFrame", tomlFile).(string)
+	Minecraft.Mc.Server.List.TableHeader = getProperty("Minecraft.Mc.Server.List.tableHeader", tomlFile).(string)
+	Minecraft.Mc.Server.List.TableRow = getProperty("Minecraft.Mc.Server.List.tableRow", tomlFile).(string)
 	Minecraft.Mc.Server.Remove.Command = getProperty("Minecraft.Mc.Server.Remove.command", tomlFile).(string)
 	Minecraft.Mc.Server.Remove.Description = getProperty("Minecraft.Mc.Server.Remove.description", tomlFile).(string)
+	Minecraft.Mc.Server.Remove.Reply = getProperty("Minecraft.Mc.Server.Remove.reply", tomlFile).(string)
 	Minecraft.Mc.Server.Primary.Command = getProperty("Minecraft.Mc.Server.Primary.command", tomlFile).(string)
 	Minecraft.Mc.Server.Primary.Description = getProperty("Minecraft.Mc.Server.Primary.description", tomlFile).(string)
+	Minecraft.Mc.Server.Primary.Reply = getProperty("Minecraft.Mc.Server.Primary.reply", tomlFile).(string)
+
+	Minecraft.Mc.List.Command = getProperty("Minecraft.Mc.List.command", tomlFile).(string)
+	Minecraft.Mc.List.Description = getProperty("Minecraft.Mc.List.description", tomlFile).(string)
+	Minecraft.Mc.List.Reply = getProperty("Minecraft.Mc.List.reply", tomlFile).(string)
 }
 
 func getProperty(prop string, t *toml.Tree) interface{} {

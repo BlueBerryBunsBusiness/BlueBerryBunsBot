@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/EmilyBjartskular/BlueBerryBunsBot/cmd/minecraft/db"
+	mcsrv "github.com/EmilyBjartskular/BlueBerryBunsBot/cmd/minecraft/server"
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/emoji"
 	"github.com/EmilyBjartskular/BlueBerryBunsBot/util/text"
 	"github.com/Necroforger/dgrouter/exrouter"
@@ -35,6 +37,11 @@ func init() {
 	cmdServerRemove = "mc server remove ID\n"
 }
 
+// Init Initializes minecraft module
+func Init() {
+	db.Init()
+}
+
 // Add adds the minecraft command package to a CommandController
 func Add(r *exrouter.Route) {
 	mc := r.On(text.Minecraft.Mc.Command, mcFunc)
@@ -56,6 +63,8 @@ func Add(r *exrouter.Route) {
 	serverPrim := server.On(text.Minecraft.Mc.Server.Primary.Command, serverPrimFunc)
 	serverPrim.Desc(text.Minecraft.Mc.Server.Primary.Description)
 
+	mcsrv.Add(mc)
+
 	for _, v := range mc.Routes {
 		helpMc += fmt.Sprintf("%s %-15s:: %s\n", v.Category, v.Name, v.Description)
 	}
@@ -76,8 +85,8 @@ func serverFunc(ctx *exrouter.Context) {
 func serverAddFunc(ctx *exrouter.Context) {
 	guild := ctx.Msg.GuildID
 	host := ctx.Args.Get(1)
-	port, err := strconv.Atoi(ctx.Args.Get(3))
-	pass := ctx.Args.Get(2)
+	port, err := strconv.Atoi(ctx.Args.Get(2))
+	pass := ctx.Args.Get(3)
 	prim := ctx.Args.Get(4)
 	if host == "" || pass == "" {
 		ctx.Reply(helpPrefix + cmdPrefix + cmdServerAdd + helpSuffix)
@@ -88,7 +97,7 @@ func serverAddFunc(ctx *exrouter.Context) {
 		ctx.Reply(text.Minecraft.Errors.InvalidPort)
 		return
 	}
-	err = addServer(guild, host, pass, port, prim)
+	err = db.AddServer(guild, host, pass, port, prim)
 	if err != nil {
 		if strings.Contains(err.Error(), "Error 1062") {
 			ctx.Reply(fmt.Sprintf(text.Minecraft.Errors.ServerExists, host))
@@ -103,7 +112,7 @@ func serverAddFunc(ctx *exrouter.Context) {
 
 func serverListFunc(ctx *exrouter.Context) {
 	guild := ctx.Msg.GuildID
-	servers, prim, err := getServers(guild)
+	servers, prim, err := db.GetServers(guild)
 	if err != nil {
 		ctx.Reply(text.Minecraft.Errors.ServerSide)
 		return
@@ -155,7 +164,7 @@ func serverRemoveFunc(ctx *exrouter.Context) {
 		reply += helpPrefix + cmdPrefix + cmdServerRemove + helpSuffix
 		ctx.Reply(reply)
 	}
-	srv, err := deleteServer(guild, id)
+	srv, err := db.DeleteServer(guild, id)
 	if err != nil {
 		ctx.Reply(text.Minecraft.Errors.ServerSide)
 		return
@@ -172,9 +181,9 @@ func serverPrimFunc(ctx *exrouter.Context) {
 		ctx.Reply(reply)
 		return
 	}
-	srv, err := setPrimary(guild, id)
+	srv, err := db.SetPrimary(guild, id)
 	if err != nil {
-		if err == ErrInvID {
+		if err == db.ErrInvID {
 			reply := text.Minecraft.Errors.InvalidID + "\n"
 			reply += helpPrefix + cmdPrefix + cmdServerRemove + helpSuffix
 			ctx.Reply(reply)
